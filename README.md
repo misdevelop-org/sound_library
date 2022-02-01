@@ -14,44 +14,24 @@ import 'package:sound_library/sound_library.dart';
 
 ## Usage
 
-Upload an image to given path
+Play a sound from the library
 
 ```dart
-  String url = await FireUploader(path:'/collectionName/Image.png').postImage(file);
+  SoundPlayer.i.play(Sounds.click);
 ```
 
-Or upload directly from bytes (Uint8List) to given path
+Check if audio is enabled locally
 
 ```dart
-  String url = await FireUploader(path:'/collectionName/Image.png').postImageFromUint8List(bytes);
+  bool enabled = SoundPlayer.i.checkAudioEnabled();
 ```
 
-Select images from gallery and upload them
+Enable/disable sounds
 
 ```dart
-  String url = await FireUploader(path:'/collectionName/Image.png',maxImagesCount: 5).selectAndUpload();
+  SoundPlayer.i.setAudioEnabled(true/false);
 ```
-
-
-Save images, text and data to device persistor
-
-```dart
-  String localPath = await DataPersistor().saveImage('/collectionName/Image.png',bytes);
-```
-
-Get images, text and data to device persistor
-
-```dart
-  String localPath = await DataPersistor().getImage('/collectionName/Image.png');
-```
-
-Remove images, text and data to device persistor
-
-```dart
-  String localPath = await DataPersistor().removeImage('/collectionName/Image.png');
-```
-
 
 ## Additional information
 
-This package assumes complete Firebase configuration with Storage and permissions.
+This package assumes corresponding permissions depending on platform

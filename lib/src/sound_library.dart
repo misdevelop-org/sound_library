@@ -47,7 +47,7 @@ class SoundPlayer {
   }
 
   void play(Sounds sound) async {
-    if (instance.enable) {
+    if (i.enable) {
       AudioCache audioPlayer = AudioCache();
       double volume = 1;
       if (sound == Sounds.success) {
@@ -58,20 +58,20 @@ class SoundPlayer {
   }
 
   static Future<bool> checkAudioEnabled() async {
-    instance.enable = (await DataPersistor().getString('soundPermission') == 'true');
-    return instance.enable;
+    i.enable = (await DataPersistor().getString('soundEnabled') == 'true');
+    return i.enable;
   }
 
   static setAudioEnabled(bool enable) async {
-    DataPersistor().saveString('soundPermission',enable?'true':'false');
+    DataPersistor().saveString('soundEnabled', enable ? 'true' : 'false');
   }
 
-  static final SoundPlayer instance = SoundPlayer._internal();
+  static final SoundPlayer i = SoundPlayer._internal();
 
   SoundPlayer._internal();
 
   factory SoundPlayer() {
     // checkAudioPermission();
-    return instance;
+    return i;
   }
 }

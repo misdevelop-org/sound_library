@@ -1,6 +1,6 @@
 name: sound_library
 description: Easy UI sounds
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/SirLegui/sound_library
 
 environment:
@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   audioplayers: ^0.20.1
-  storage_manager: ^0.0.1
+  storage_manager: ^0.0.3
 
 dev_dependencies:
   flutter_test:
