@@ -1,6 +1,6 @@
 name: sound_library
 description: Easy UI sounds
-version: 0.0.3
+version: 0.0.4
 homepage: https://github.com/SirLegui/sound_library
 
 environment:
@@ -32,3 +32,6 @@ flutter:
     - assets/welcome.mp3
     - assets/wood_hit.mp3
     - assets/trash.mp3
+    - assets/intro.mp3
+    - assets/boton.mp3
+    - assets/kaching.mp3

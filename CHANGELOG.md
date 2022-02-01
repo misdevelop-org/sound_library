@@ -9,3 +9,7 @@ Removed license dependency
 ## 0.0.3
 
 Fixed exports
+
+##0.0.4
+
+Added sounds to library

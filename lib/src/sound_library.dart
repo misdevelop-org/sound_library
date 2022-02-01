@@ -3,9 +3,8 @@ import 'dart:typed_data';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:storage_manager/storage_manager.dart';
 
-enum Sounds { click, order_complete, success, welcome, wood_hit, add_to_cart, action, trash, drag }
+enum Sounds { click, order_complete, success, welcome, wood_hit, add_to_cart, action, trash, drag, open, intro, kaching }
 
-// Soundpool pool = Soundpool(streamType: StreamType.notification);
 class SoundPlayer {
   bool enable = true;
   Uint8List? buffer;
@@ -39,6 +38,15 @@ class SoundPlayer {
         break;
       case Sounds.action:
         path = 'action.mp3';
+        break;
+      case Sounds.intro:
+        path = 'intro.mp3';
+        break;
+      case Sounds.open:
+        path = 'boton.mp3';
+        break;
+      case Sounds.kaching:
+        path = 'kaching.mp3';
         break;
       default:
         path = 'click.mp3';
