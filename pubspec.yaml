@@ -1,0 +1,34 @@
+name: sound_library
+description: Easy UI sounds
+version: 0.0.1
+homepage: https://github.com/SirLegui/sound_library
+
+environment:
+  sdk: ">=2.15.1 <3.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  audioplayers: ^0.20.1
+  storage_manager: ^0.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^1.0.0
+
+flutter:
+
+  assets:
+
+    #Sounds
+    - assets/add_to_cart.mp3
+    - assets/action.mp3
+    - assets/click.mp3
+    - assets/drag.mp3
+    - assets/order_complete.mp3
+    - assets/success.mp3
+    - assets/welcome.mp3
+    - assets/wood_hit.mp3
+    - assets/trash.mp3
