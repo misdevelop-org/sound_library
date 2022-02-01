@@ -1,6 +1,6 @@
 name: sound_library
 description: Easy UI sounds
-version: 0.0.2
+version: 0.0.3
 homepage: https://github.com/SirLegui/sound_library
 
 environment:
