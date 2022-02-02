@@ -1,6 +1,6 @@
 name: sound_library
 description: Easy UI sounds to directly use in your app through mis develop sound library database
-version: 0.1.0
+version: 0.1.1
 homepage: https://github.com/SirLegui/sound_library
 
 environment:

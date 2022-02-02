@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:http/http.dart';
 import 'package:storage_manager/storage_manager.dart';
 
 ///List of sounds available to use
@@ -27,7 +26,7 @@ class SoundPlayer {
   Uint8List? buffer;
 
   ///Searches the audio file locally or downloads and caches it
-  Future<Uint8List> _getSoundBytes(Sounds sound) async {
+  String _getSoundBytes(Sounds sound) {
     String path =
         'https://firebasestorage.googleapis.com/v0/b/misdevelop.appspot.com/o/sound_library%2F';
     switch (sound) {
@@ -82,15 +81,15 @@ class SoundPlayer {
         path +=
             'click.mp3?alt=media&token=ed19939f-7703-475e-8367-1a70629c011b';
     }
-    Uint8List bytes = await DataPersistor().getImage(path);
-    if (bytes.isEmpty) {
-      var response = await get(Uri.parse(path));
-      if (response.statusCode == 200) {
-        bytes = response.bodyBytes;
-        DataPersistor().saveImage(path, bytes);
-      }
-    }
-    return bytes;
+    // Uint8List bytes = await DataPersistor().getImage(path);
+    // if (bytes.isEmpty) {
+    //   var response = await get(Uri.parse(path));
+    //   if (response.statusCode == 200) {
+    //     bytes = response.bodyBytes;
+    //     DataPersistor().saveImage(path, bytes);
+    //   }
+    // }
+    return path;
   }
 
   ///Checks if the selected sound is cached
@@ -100,8 +99,18 @@ class SoundPlayer {
   /// Set the volume from 0.0 to 1.0, defaults to 1.0
   void play(Sounds sound, {double volume = 1}) async {
     if (i.enable) {
+      AudioPlayer audioPlayer = AudioPlayer();
+      await audioPlayer.play(_getSoundBytes(sound), volume: volume);
+    }
+  }
+
+  ///Plays the audio file of the fiven path
+  ///
+  /// Set the volume from 0.0 to 1.0, defaults to 1.0
+  void playLocal(String path, {double volume = 1}) async {
+    if (i.enable) {
       AudioCache audioPlayer = AudioCache();
-      await audioPlayer.playBytes(await _getSoundBytes(sound), volume: volume);
+      await audioPlayer.play(path, volume: volume);
     }
   }
 
