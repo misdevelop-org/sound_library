@@ -7,22 +7,6 @@
   
 Easy Free UI sounds library for your app
 
-<h3>Sounds list</h3>
-
-<p>Click</p>
-
-<audio controls>
-  <source src="https://firebasestorage.googleapis.com/v0/b/misdevelop.appspot.com/o/sound_library%2Fclick.mp3?alt=media&token=ed19939f-7703-475e-8367-1a70629c011b" type="audio/mp3">
-  Your browser does not support the audio element.
-</audio>
-<p>Success</p>
-
-<audio controls>
-  <source src="https://firebasestorage.googleapis.com/v0/b/misdevelop.appspot.com/o/sound_library%2Fsuccess.mp3?alt=media&token=32dd1ca2-44cb-4e6a-b48b-3525c6994b89" type="audio/mp3">
-  Your browser does not support the audio element.
-</audio>
-
-  
 ## Getting started  
   
 Add this import line  
