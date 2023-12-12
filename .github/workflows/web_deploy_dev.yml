@@ -94,7 +94,7 @@ jobs:
 
       - name: Create .firebaserc file
         run: |
-          echo '{"projects":{"default":"mis-develop"}}' > .firebaserc
+          echo '{"projects":{"default":"mis-develop"}}' > example/.firebaserc
 
       - name: Create firebase.json file
         run: |
@@ -114,13 +114,15 @@ jobs:
                 }
               ]
             }
-          }' > firebase.json
+          }' > example/firebase.json
 
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@v1.1.0
         with:
-          args: deploy --only hosting:${{ env.HOST_FOLDER }} --token ${{ secrets.FIREBASE_TOKEN }}
-        working-directory: example
+          PROJECT_PATH: ./example
+          args: deploy --only hosting:${{ env.HOST_FOLDER }}
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         
       - name: Notify success to MIS Slack channel
         id: slackSuccessMIS
