@@ -1,0 +1,152 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Web deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  # pull_request:
+  #   branches: [ "main" ]
+
+env:
+  MIS_CHANNEL_ID: 'design-system-builds'
+  WORKFLOW_NAME: 'Sounds Library deploy'
+  DEPLOY_URL: 'https://sounds.library.misdevelop.com'
+  HOST_FOLDER: 'mis-sounds-library'
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+      - name: Notify startup to MIS Slack channel
+        id: slackStartUpProdMIS
+        uses: slackapi/slack-github-action@v1.19.0
+        with:
+          channel-id: ${{env.MIS_CHANNEL_ID}}
+          payload: |
+            {
+                "text": "${{ env.WORKFLOW_NAME }}: started! :chrome: :sparkles: :rocket:",
+            	"blocks": [
+            		{
+            			"type": "section",
+            			"text": {
+            				"type": "mrkdwn",
+            				"text": "${{ env.WORKFLOW_NAME }}: started! :chrome: :sparkles: :rocket:"
+            			}
+            		}
+            	]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_MIS_BOT_TOKEN }}
+
+
+      - uses: actions/checkout@v3
+
+      - name: Run Flutter build
+        run: |
+          flutter pub upgrade
+          flutter build web
+  
+      - name: Catch flutter build error
+        if: ${{ failure()}}
+        uses: slackapi/slack-github-action@v1.19.0
+        with:
+          channel-id: ${{env.MIS_CHANNEL_ID}}
+          # For posting a rich message using Block Kit
+          payload: |
+            {
+                "text": "${{ env.WORKFLOW_NAME }}: failed! :exclamation:",
+            	"blocks": [
+            		{
+            			"type": "section",
+            			"text": {
+            				"type": "mrkdwn",
+            				"text": "${{ env.WORKFLOW_NAME }}: failed! :exclamation: :exclamation:"
+            			}
+            		}
+            	],
+            	"attachments": [
+            		{
+            			"color": "#632905",
+            			"blocks": [
+            				{
+            					"type": "section",
+            					"text": {
+            						"type": "mrkdwn",
+            						"text": "Check runner..."
+            					}
+            				}
+            			]
+            		}
+            	]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_MIS_BOT_TOKEN }}
+
+      - name: Create .firebaserc file
+        run: |
+          echo '{"projects":{"default":"mis-develop"}}' > .firebaserc
+
+      - name: Create firebase.json file
+        run: |
+          echo '{
+            "hosting": {
+              "public": "build/web",
+              "site": "mis-sounds-library",
+              "ignore": [
+                "firebase.json",
+                "**/.*",
+                "**/node_modules/**"
+              ],
+              "rewrites": [
+                {
+                  "source": "**",
+                  "destination": "/index.html"
+                }
+              ]
+            }
+          }' > firebase.json
+
+      - name: Update build folder
+        run: |
+          
+          firebase deploy --only hosting:${{ env.HOST_FOLDER }}
+        
+      - name: Notify success to MIS Slack channel
+        id: slackSuccessMIS
+        uses: slackapi/slack-github-action@v1.19.0
+        with:
+          channel-id: ${{env.MIS_CHANNEL_ID}}
+          payload: |
+            {
+                "text": "${{ env.WORKFLOW_NAME }}: done! :white-check-mark: :sparkles: :rocket:",
+            	"blocks": [
+            		{
+            			"type": "section",
+            			"text": {
+            				"type": "mrkdwn",
+            				"text": "${{ env.WORKFLOW_NAME }}: done! :white-check-mark: :sparkles: :rocket:"
+            			}
+            		}
+            	],
+            	"attachments": [
+            		{
+            			"color": "#5BE271",
+            			"blocks": [
+            				{
+            					"type": "section",
+            					"text": {
+            						"type": "mrkdwn",
+            						"text": "Access build at: ${{ env.DEPLOY_URL }}"
+            					}
+            				}
+            			]
+            		}
+            	]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_MIS_BOT_TOKEN }}
