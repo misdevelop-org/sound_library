@@ -119,7 +119,7 @@ jobs:
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@v1.1.0
         with:
-          PROJECT_PATH: ./example
+          entryPoint: ./example
           args: deploy --only hosting:${{ env.HOST_FOLDER }}
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}

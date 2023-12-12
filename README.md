@@ -3,7 +3,9 @@
 
 ## Features
 
-Easy and free 🆓 UI sounds library 🎶 for your general purposes 🎧 🔊 [![Web deploy](https://github.com/misdevelop-org/sound_library/actions/workflows/web_deploy_dev.yml/badge.svg)](https://github.com/misdevelop-org/sound_library/actions/workflows/web_deploy_dev.yml)
+Easy and free 🆓 UI sounds library 🎶 for your general purposes 🎧 🔊
+
+[![Web deploy](https://github.com/misdevelop-org/sound_library/actions/workflows/web_deploy_dev.yml/badge.svg)](https://github.com/misdevelop-org/sound_library/actions/workflows/web_deploy_dev.yml)
 
 ## Getting started
 
