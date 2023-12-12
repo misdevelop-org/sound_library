@@ -52,6 +52,7 @@ jobs:
 
       - name: Run Flutter build
         run: |
+          cd example
           flutter pub upgrade
           flutter build web
   
