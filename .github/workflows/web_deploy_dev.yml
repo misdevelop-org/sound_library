@@ -116,10 +116,11 @@ jobs:
             }
           }' > firebase.json
 
-      - name: Update build folder
-        run: |
-          cd example
-          firebase deploy --only hosting:${{ env.HOST_FOLDER }} --token ${{ secrets.FIREBASE_TOKEN }}
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@v1.1.0
+        with:
+          args: deploy --only hosting:${{ env.HOST_FOLDER }} --token ${{ secrets.FIREBASE_TOKEN }}
+        working-directory: example
         
       - name: Notify success to MIS Slack channel
         id: slackSuccessMIS
