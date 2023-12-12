@@ -8,8 +8,6 @@ name: Web deploy
 on:
   push:
     branches: [ "main" ]
-  # pull_request:
-  #   branches: [ "main" ]
 
 env:
   MIS_CHANNEL_ID: 'design-system-builds'
@@ -19,7 +17,7 @@ env:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       - name: Notify startup to MIS Slack channel
@@ -45,6 +43,12 @@ jobs:
 
 
       - uses: actions/checkout@v3
+
+      #Install flutter latest version with cache
+      - uses: subosito/flutter-action@v1.5.0
+        with:
+          channel: 'stable'
+          cache: true
 
       - name: Run Flutter build
         run: |
@@ -114,7 +118,7 @@ jobs:
       - name: Update build folder
         run: |
           
-          firebase deploy --only hosting:${{ env.HOST_FOLDER }}
+          firebase deploy --only hosting:${{ env.HOST_FOLDER }} --token ${{ secrets.FIREBASE_TOKEN }}
         
       - name: Notify success to MIS Slack channel
         id: slackSuccessMIS
