@@ -116,13 +116,13 @@ jobs:
             }
           }' > example/firebase.json
 
-      - name: Deploy to Firebase
-        uses: w9jds/firebase-action@v1.1.0
-        with:
-          entryPoint: ./example
-          args: deploy --only hosting:${{ env.HOST_FOLDER }}
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Update build folder
+        run: |
+          cd example
+          firebase deploy --only hosting:${{ env.HOST_FOLDER }} --token ${{ secrets.FIREBASE_TOKEN }}
         
       - name: Notify success to MIS Slack channel
         id: slackSuccessMIS
