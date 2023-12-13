@@ -25,6 +25,10 @@ import 'package:sound_library/sound_library.dart';
 
 #### Available sounds
 
+##### Try out the sounds in the example project
+
+Live example: [Sounds Library](https://sounds.library.misdevelop.com)
+
 | Name | Description |
 | ---- | ---- |
 | Click | General button click |
@@ -40,35 +44,66 @@ import 'package:sound_library/sound_library.dart';
 | Order Complete | Order completed sound |
 | Cashing machine | Cashing machine sound |
 
-##### Try out the sounds in the example project
-
-Live example: [Sounds Library](https://sounds.library.misdevelop.com)
 
 ## Usage  
   
+##### Play a sound with a `volume` level and `position` on the track
+
+```dart
+  SoundPlayer.play(Sounds.click, volume: 0.5, position: Duration(milliseconds: 500);
+```
+
 ##### Play a sound from the `Sounds` library
-  
-```dart  
+
+```dart
   SoundPlayer.play(Sounds.click);
-```  
+```
   
-##### Play a sound from a local `path`
+##### Play a sound from a `URL` path
   
 ```dart  
   SoundPlayer.playFromUrl(path);
-```  
-  
-##### Check if audio is `enabled` locally
+```
+
+##### Play a sound from a `file` path
+
+```dart
+  SoundPlayer.playFromDeviceFilePath(file);
+```
+
+##### Play a sound from an `asset` path
+
+```dart
+  SoundPlayer.playFromAssetPath(asset);
+```
+
+##### Play a sound from `bytes`
+
+```dart
+  SoundPlayer.playFromBytes(bytes);
+```
+
+##### Check if audio is currently `enabled`
   
 ```dart  
-  bool enabled = SoundPlayer.checkAudioEnabled();
-```  
-  
-##### Enable/disable sounds  
+  bool enabled = SoundPlayer.isAudioEnabled;
+```
+
+##### Check if audio is `enabled` on the device storage
+This will also load the state from the device storage onto the `isAudioEnabled` property
+
+```dart
+  bool enabled = await SoundPlayer.checkLocalStorageEnabled();
+```
+
+##### Enable/disable sounds
+This will also save the state to the device storage
   
 ```dart  
   SoundPlayer.setAudioEnabled(true/false);
-```  
+```
+
+#####
   
 ## Additional information  
 

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -54,6 +56,45 @@ class SoundPlayer {
   }) async {
     if (isAudioEnabled) {
       await audioPlayer.play(UrlSource(url), volume: volume, position: position);
+    }
+  }
+
+  /// Plays the audio file of the given [asset]
+  ///
+  /// Set the [volume] from `0.0` to `1.0`, defaults to `1.0`
+  static void playFromAssetPath(
+    String asset, {
+    double volume = 1,
+    Duration? position,
+  }) async {
+    if (isAudioEnabled) {
+      await audioPlayer.play(AssetSource(asset), volume: volume, position: position);
+    }
+  }
+
+  /// Plays the audio file of the given [bytes]
+  ///
+  /// Set the [volume] from `0.0` to `1.0`, defaults to `1.0`
+  static void playFromBytes(
+    Uint8List bytes, {
+    double volume = 1,
+    Duration? position,
+  }) async {
+    if (isAudioEnabled) {
+      await audioPlayer.play(BytesSource(bytes), volume: volume, position: position);
+    }
+  }
+
+  /// Plays the audio file of the given [file]
+  ///
+  /// Set the [volume] from `0.0` to `1.0`, defaults to `1.0`
+  static void playFromDeviceFilePath(
+    String file, {
+    double volume = 1,
+    Duration? position,
+  }) async {
+    if (isAudioEnabled) {
+      await audioPlayer.play(DeviceFileSource(file), volume: volume, position: position);
     }
   }
 

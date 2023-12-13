@@ -1,3 +1,8 @@
+## 0.2.0
+- Improved methods and updated to latest dependencies
+- Enhanced documentation and examples
+- Included live app to demonstrate usage and test the sound collection
+- Added support for playing audio from network, assets, bytes and files
 
 ## 0.1.1  
 #### Added  
