@@ -54,7 +54,7 @@ jobs:
         run: |
           cd example
           flutter pub upgrade
-          flutter build web
+          flutter build web --web-renderer=canvaskit
   
       - name: Catch flutter build error
         if: ${{ failure()}}

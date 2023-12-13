@@ -31,107 +31,127 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final int blockLength = 5;
+  List<Widget> soundsList = [];
+  @override
+  void initState() {
+    soundsList = [
+      buildSoundButton(
+        'Click ',
+        Sounds.click,
+        icon: Icon(
+          Icons.input,
+          color: Colors.blue[800],
+          size: 30,
+        ),
+      ),
+      buildSoundButton(
+        'Welcome ',
+        Sounds.welcome,
+        icon: Icon(
+          Icons.home,
+          color: Colors.blue[800],
+          size: 30,
+        ),
+      ),
+      buildSoundButton(
+        'Open',
+        Sounds.open,
+        icon: const Icon(
+          Icons.door_back_door_outlined,
+          color: Colors.black,
+          size: 30,
+        ),
+      ),
+      buildSoundButton(
+        'Close (Wood hit) ',
+        Sounds.woodHit,
+        icon: Icon(
+          Icons.emoji_objects,
+          color: Colors.brown[800],
+          size: 30,
+        ),
+      ),
+      buildSoundButton(
+        'Order Complete ',
+        Sounds.orderComplete,
+        icon: Icon(
+          Icons.check,
+          color: Colors.green[800],
+          size: 30,
+        ),
+      ),
+      buildSoundButton(
+        'Deleted ',
+        Sounds.deleted,
+        icon: Icon(
+          Icons.delete,
+          color: Colors.red[800],
+          size: 30,
+        ),
+      ),
+      buildSoundButton(
+        'Add to cart ',
+        Sounds.addToCart,
+        icon: Icon(
+          Icons.add_shopping_cart,
+          color: Colors.amber[800],
+          size: 30,
+        ),
+      ),
+      buildSoundButton(
+        'Success ',
+        Sounds.success,
+        icon: Icon(
+          Icons.check_circle,
+          color: Colors.green[800],
+          size: 30,
+        ),
+      ),
+      buildSoundButton(
+        'Cashing Machine ',
+        Sounds.cashingMachine,
+        icon: Icon(
+          Icons.monetization_on,
+          color: Colors.yellow[800],
+          size: 30,
+        ),
+      ),
+      buildSoundButton(
+        'Action ',
+        Sounds.action,
+        icon: Icon(
+          Icons.add_circle,
+          color: Colors.blue[800],
+          size: 30,
+        ),
+      ),
+    ];
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFc1c1c1),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0E0E43),
-        title:
-            const Text("Sound Library", style: TextStyle(color: Colors.white)),
+        title: const Text("Sound Library", style: TextStyle(color: Colors.white)),
       ),
       body: ListView(
         children: [
           Wrap(
             alignment: WrapAlignment.center,
             runAlignment: WrapAlignment.center,
-            spacing: 10,
-            runSpacing: 10,
             children: [
-              buildSoundButton(
-                'Click ',
-                Sounds.click,
-                icon: Icon(
-                  Icons.input,
-                  color: Colors.blue[800],
-                  size: 30,
+              for (var i = 0; i < soundsList.length; i += blockLength)
+                Column(
+                  children: [
+                    for (var j = i; j < i + blockLength; j++) soundsList.length > j ? soundsList[j] : const SizedBox(),
+                  ],
                 ),
-              ),
-              buildSoundButton(
-                'Welcome ',
-                Sounds.welcome,
-                icon: Icon(
-                  Icons.home,
-                  color: Colors.blue[800],
-                  size: 30,
-                ),
-              ),
-              buildSoundButton(
-                'Open',
-                Sounds.open,
-                icon: const Icon(
-                  Icons.door_back_door_outlined,
-                  color: Colors.black,
-                  size: 30,
-                ),
-              ),
-              buildSoundButton(
-                'Close (Wood hit) ',
-                Sounds.woodHit,
-                icon: Icon(
-                  Icons.emoji_objects,
-                  color: Colors.brown[800],
-                  size: 30,
-                ),
-              ),
-              buildSoundButton(
-                'Order Complete ',
-                Sounds.orderComplete,
-                icon: Icon(
-                  Icons.check,
-                  color: Colors.green[800],
-                  size: 30,
-                ),
-              ),
-              buildSoundButton(
-                'Deleted ',
-                Sounds.deleted,
-                icon: Icon(
-                  Icons.delete,
-                  color: Colors.red[800],
-                  size: 30,
-                ),
-              ),
-              buildSoundButton(
-                'Add to cart ',
-                Sounds.addToCart,
-                icon: Icon(
-                  Icons.add_shopping_cart,
-                  color: Colors.amber[800],
-                  size: 30,
-                ),
-              ),
-              buildSoundButton(
-                'Success ',
-                Sounds.success,
-                icon: Icon(
-                  Icons.check_circle,
-                  color: Colors.green[800],
-                  size: 30,
-                ),
-              ),
-              buildSoundButton(
-                'Cashing Machine ',
-                Sounds.cashingMachine,
-                icon: Icon(
-                  Icons.monetization_on,
-                  color: Colors.yellow[800],
-                  size: 30,
-                ),
-              ),
-              //Agroferia updates quantities and prices given by the producers every week
             ],
-          )
+          ), // 6 sounds blocks
         ],
       ),
       floatingActionButton: const Text('By MIS Develop'),
@@ -140,21 +160,24 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget buildSoundButton(String name, Sounds sound, {Icon? icon}) => Padding(
         padding: const EdgeInsets.all(8.0),
-        child: SizedBox(
-          width: 200,
-          child: Card(
-            child: TextButton(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(name),
-                  const Spacer(),
-                  icon ?? const SizedBox(),
-                ],
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: SizedBox(
+            width: 200,
+            child: Card(
+              child: TextButton(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(name),
+                    const Spacer(),
+                    icon ?? const SizedBox(),
+                  ],
+                ),
+                onPressed: () {
+                  SoundPlayer.play(sound);
+                },
               ),
-              onPressed: () {
-                SoundPlayer.play(sound);
-              },
             ),
           ),
         ),
