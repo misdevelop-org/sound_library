@@ -37,7 +37,8 @@ class _MyHomePageState extends State<MyHomePage> {
       backgroundColor: const Color(0xFFc1c1c1),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0E0E43),
-        title: const Text("Sound Library", style: TextStyle(color: Colors.white)),
+        title:
+            const Text("Sound Library", style: TextStyle(color: Colors.white)),
       ),
       body: ListView(
         children: [
