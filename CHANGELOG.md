@@ -1,3 +1,11 @@
+## 2.0.2
+
+- WebAssembly: the web build no longer includes `audioplayers`, which pub.dev flagged as not compatible with wasm because
+  of its `dart:io` imports. On the web, every `SoundPlayer.play*` method now uses the Web Audio API (network URLs and
+  device paths use an `<audio>` element). Android, iOS and desktop still use `audioplayers`. The public API is unchanged.
+- Formatting follows `formatter: page_width: 120` in `analysis_options.yaml`, so `dart format` and pub.dev agree.
+- On the web, `playFromDeviceFilePath` expects a URL the browser can open, like a blob URL.
+
 ## 2.0.1
 
 - Fixed very short sounds, like `Sounds.click` and `Sounds.tap`, not being heard on iPhone and iPad browsers. On the web,

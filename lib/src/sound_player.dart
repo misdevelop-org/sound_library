@@ -1,9 +1,9 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'sound_backend.dart';
+import 'sound_backend_native.dart' if (dart.library.js_interop) 'sound_backend_web.dart';
 import 'sounds.dart';
-import 'web_sfx_stub.dart' if (dart.library.js_interop) 'web_sfx_web.dart';
 
 /// Plays the sounds of the library, or any other audio source.
 ///
@@ -24,80 +24,57 @@ class SoundPlayer {
   /// Key under which the enabled flag is persisted.
   static const String enabledKey = 'soundEnabled';
 
-  /// How many sounds can overlap before the oldest one is cut.
-  static const int maxConcurrentSounds = 4;
-
-  /// Bundled sounds live under `packages/sound_library/...`, so they are resolved without the `assets/` prefix that
-  /// `audioplayers` adds by default.
-  static final AudioCache _bundledCache = AudioCache(prefix: '');
-
-  final List<AudioPlayer> _players = [];
-  int _next = 0;
+  final SoundBackend _backend = createBackend();
   bool _enabled = true;
-  bool _contextConfigured = false;
   SharedPreferences? _prefs;
 
   /// Plays a bundled [sound].
   ///
   /// Sets the [volume] from `0.0` to `1.0`, defaults to `1.0`.
   /// Starts at [position] on the track when it is given.
-  static Future<void> play(Sounds sound, {double volume = 1, Duration? position}) async {
-    if (!isAudioEnabled) return;
-    // On the web, bundled sounds go through Web Audio: no start-up delay, so even the shortest clicks are heard on iOS.
-    if (WebSfx.isSupported && await WebSfx.play(sound.assetPath, volume: volume, position: position)) return;
-    await _play(AssetSource(sound.assetPath), volume, position, cache: _bundledCache);
-  }
+  static Future<void> play(Sounds sound, {double volume = 1, Duration? position}) =>
+      _play(() => instance._backend.playBundled(sound.assetPath, volume: volume, position: position));
 
   /// Plays the audio file at the given network [url].
   static Future<void> playFromUrl(String url, {double volume = 1, Duration? position}) =>
-      _play(UrlSource(url), volume, position);
+      _play(() => instance._backend.playUrl(url, volume: volume, position: position));
 
   /// Plays the audio file of the given Flutter [asset] key.
   ///
-  /// The key is relative to the `assets/` folder of the bundle, like `AssetSource` in `audioplayers`.
+  /// The key is relative to the `assets/` folder of the bundle, so `sounds/ding.mp3` plays `assets/sounds/ding.mp3`.
   static Future<void> playFromAssetPath(String asset, {double volume = 1, Duration? position}) =>
-      _play(AssetSource(asset), volume, position);
+      _play(() => instance._backend.playAsset(asset, volume: volume, position: position));
 
   /// Plays the audio file of the given [bytes].
   static Future<void> playFromBytes(Uint8List bytes, {double volume = 1, Duration? position}) =>
-      _play(BytesSource(bytes), volume, position);
+      _play(() => instance._backend.playBytes(bytes, volume: volume, position: position));
 
   /// Plays the audio file at the given [file] path on the device.
+  ///
+  /// On the web there are no device paths: pass an URL the browser can open, like a blob URL.
   static Future<void> playFromDeviceFilePath(String file, {double volume = 1, Duration? position}) =>
-      _play(DeviceFileSource(file), volume, position);
+      _play(() => instance._backend.playFile(file, volume: volume, position: position));
 
   /// Gets audio ready. Optional: the first play does it too.
   ///
   /// On the web, browsers lock audio until the user touches the page. Call this when your app starts so the first touch
   /// unlocks it, instead of the first sound.
-  static void init() => WebSfx.init();
+  static void init() => instance._backend.init();
 
   /// Loads the given [sounds] into memory so their first play has no delay.
   static Future<void> preload(Iterable<Sounds> sounds) async {
     try {
-      if (WebSfx.isSupported) {
-        await WebSfx.preload(sounds.map((sound) => sound.assetPath));
-        return;
-      }
-      await _bundledCache.loadAll(sounds.map((sound) => sound.assetPath).toList());
+      await instance._backend.preload(sounds.map((sound) => sound.assetPath));
     } on Object catch (error) {
       debugPrint('sound_library: could not preload sounds: $error');
     }
   }
 
   /// Stops everything that is playing.
-  static Future<void> stop() {
-    WebSfx.stop();
-    return Future.wait(instance._players.map((player) => player.stop()));
-  }
+  static Future<void> stop() => instance._backend.stop();
 
   /// Releases the audio players. They are created again on the next play.
-  static Future<void> dispose() async {
-    final players = List<AudioPlayer>.of(instance._players);
-    instance._players.clear();
-    instance._next = 0;
-    await Future.wait(players.map((player) => player.dispose()));
-  }
+  static Future<void> dispose() => instance._backend.dispose();
 
   /// Whether audio is currently enabled on this instance.
   static bool get isAudioEnabled => instance._enabled;
@@ -117,39 +94,12 @@ class SoundPlayer {
 
   static Future<SharedPreferences> get _preferences async => instance._prefs ??= await SharedPreferences.getInstance();
 
-  static Future<void> _play(Source source, double volume, Duration? position, {AudioCache? cache}) async {
+  static Future<void> _play(Future<void> Function() play) async {
     if (!isAudioEnabled) return;
     try {
-      final player = await instance._nextPlayer();
-      player.audioCache = cache ?? AudioCache.instance;
-      await player.play(source, volume: volume, position: position);
+      await play();
     } on Object catch (error) {
       debugPrint('sound_library: could not play sound: $error');
-    }
-  }
-
-  Future<AudioPlayer> _nextPlayer() async {
-    await _configureContext();
-    if (_players.length < maxConcurrentSounds) {
-      final player = AudioPlayer();
-      _players.add(player);
-      return player;
-    }
-    final player = _players[_next];
-    _next = (_next + 1) % _players.length;
-    return player;
-  }
-
-  /// UI sounds should not pause the music or the podcast the user is listening to.
-  Future<void> _configureContext() async {
-    if (_contextConfigured) return;
-    _contextConfigured = true;
-    try {
-      await AudioPlayer.global.setAudioContext(
-        AudioContextConfig(focus: AudioContextConfigFocus.mixWithOthers).build(),
-      );
-    } on Object catch (error) {
-      debugPrint('sound_library: audio context not supported on this platform: $error');
     }
   }
 }

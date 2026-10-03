@@ -34,7 +34,7 @@ import 'package:sound_library/sound_library.dart';
 
 No extra setup is needed. The sounds are declared by the package, so you do not add them to your `pubspec.yaml`.
 
-Supported platforms are the ones `audioplayers` supports. The live app is built for the web.
+Android, iOS, macOS, Windows, Linux and the web are supported, including WebAssembly builds. Native platforms play with `audioplayers`, and the web plays with the Web Audio API.
 
 ## Usage
 
@@ -161,7 +161,7 @@ Intros and welcomes that give your app its personality.
 ## Platform notes
 
 - **Web**: browsers only start audio after the user interacts with the page, so a sound triggered on load will be
-  skipped. Sounds triggered by a tap or click work. Bundled sounds play through the Web Audio API, which is what makes
+  skipped. Sounds triggered by a tap or click work. All sounds play through the Web Audio API, which is what makes
   the shortest ones audible on iPhone. Call `SoundPlayer.init()` when your app starts so the first touch unlocks audio.
   Like other Web Audio sounds on iOS, they follow the silent switch of the device.
 - **iOS and Android**: sounds mix with other audio and do not take audio focus.

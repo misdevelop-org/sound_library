@@ -15,7 +15,7 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
-      - run: dart format --output=none --set-exit-if-changed -l 120 lib test example/lib example/test
+      - run: dart format --output=none --set-exit-if-changed lib test example/lib example/test
       - run: flutter analyze
       - run: flutter test
       - name: Example app
