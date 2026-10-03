@@ -7,6 +7,9 @@
 - Added the `web` package as a dependency.
 - Example app: moved the light/dark switch to the top right corner, and the live site no longer needs a cache clear to
   show a new version (no service worker, and revalidated caching on Firebase Hosting).
+  The background shapes now sit on layers at different distances with scroll and mouse parallax, are pulled toward the
+  cursor, and are pushed by a ripple when a sound plays. Cards lean toward the cursor, reveal on scroll, and there are
+  keyboard shortcuts and a back-to-top button.
 
 ## 2.0.0
 

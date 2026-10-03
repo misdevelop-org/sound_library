@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sound_library_example/main.dart';
 
@@ -45,5 +46,30 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.byTooltip('Light mode'), findsOneWidget);
     expect(Theme.of(tester.element(find.byType(Scaffold))).brightness, Brightness.dark);
+  });
+
+  testWidgets('keyboard shortcuts pick a category and focus the search', (tester) async {
+    tester.view.physicalSize = const Size(1400, 4000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(const SoundLibraryApp());
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.digit3);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('Success'), findsOneWidget);
+    expect(find.text('Click'), findsNothing);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.digit0);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('Click'), findsOneWidget);
+
+    // While typing in the search field, letters are text and not shortcuts.
+    await tester.sendKeyEvent(LogicalKeyboardKey.slash);
+    await tester.pump();
+    await tester.enterText(find.byType(TextField), 'm');
+    await tester.pump();
+    expect(find.byIcon(Icons.volume_up_rounded), findsOneWidget);
   });
 }

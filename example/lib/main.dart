@@ -52,6 +52,10 @@ class _SoundLibraryPageState extends State<SoundLibraryPage> {
   static const _installCommand = 'flutter pub add sound_library';
 
   final _searchController = TextEditingController();
+  final _searchFocus = FocusNode();
+  final _pageFocus = FocusNode();
+  final _scroll = ScrollController();
+  final _backdrop = BackdropController();
   SoundCategory? _category;
   double _volume = 1;
   bool _enabled = true;
@@ -70,6 +74,9 @@ class _SoundLibraryPageState extends State<SoundLibraryPage> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocus.dispose();
+    _pageFocus.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -94,6 +101,42 @@ class _SoundLibraryPageState extends State<SoundLibraryPage> {
     await SoundPlayer.setAudioEnabled(enabled);
   }
 
+  /// Keyboard shortcuts for desktop. They step aside while the user is typing in the search field.
+  KeyEventResult _onKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    final keys = HardwareKeyboard.instance;
+    if (keys.isControlPressed || keys.isMetaPressed || keys.isAltPressed) return KeyEventResult.ignored;
+    final key = event.logicalKey;
+
+    if (_searchFocus.hasFocus) {
+      if (key != LogicalKeyboardKey.escape) return KeyEventResult.ignored;
+      if (_searchController.text.isNotEmpty) {
+        _searchController.clear();
+        setState(() {});
+      } else {
+        _pageFocus.requestFocus();
+      }
+      return KeyEventResult.handled;
+    }
+
+    if (key == LogicalKeyboardKey.slash) {
+      _searchFocus.requestFocus();
+    } else if (key == LogicalKeyboardKey.keyM) {
+      _toggleSound();
+    } else if (key == LogicalKeyboardKey.keyT) {
+      widget.onToggleTheme();
+    } else if (key == LogicalKeyboardKey.escape && _searchController.text.isNotEmpty) {
+      _searchController.clear();
+      setState(() {});
+    } else if (key.keyId >= LogicalKeyboardKey.digit0.keyId && key.keyId <= LogicalKeyboardKey.digit5.keyId) {
+      final index = key.keyId - LogicalKeyboardKey.digit0.keyId;
+      setState(() => _category = index == 0 ? null : SoundCategory.values[index - 1]);
+    } else {
+      return KeyEventResult.ignored;
+    }
+    return KeyEventResult.handled;
+  }
+
   @override
   Widget build(BuildContext context) {
     final sections = [
@@ -103,73 +146,103 @@ class _SoundLibraryPageState extends State<SoundLibraryPage> {
     final width = MediaQuery.sizeOf(context).width;
     final gutter = width < 600 ? 16.0 : 40.0;
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          const Positioned.fill(child: Backdrop()),
-          Positioned(
-            top: 12,
-            right: 12,
-            child: SafeArea(child: _ThemeButton(onPressed: widget.onToggleTheme)),
-          ),
-          Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1240),
-              child: CustomScrollView(
-                slivers: [
-                  SliverPadding(
-                    padding: EdgeInsets.fromLTRB(gutter, 72, gutter, 0),
-                    sliver: SliverToBoxAdapter(child: _Header(installCommand: _installCommand)),
+    return BackdropScope(
+      controller: _backdrop,
+      child: Focus(
+        focusNode: _pageFocus,
+        autofocus: true,
+        onKeyEvent: _onKey,
+        child: MouseRegion(
+          // Tells the background where the mouse is, so the shapes can follow it.
+          onHover: (event) => _backdrop.pointer = event.position,
+          onExit: (_) => _backdrop.pointer = null,
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTapDown: (_) {
+              if (!_searchFocus.hasFocus) _pageFocus.requestFocus();
+            },
+            child: Scaffold(
+              body: Stack(
+                children: [
+                  Positioned.fill(child: Backdrop(controller: _backdrop, scroll: _scroll)),
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: SafeArea(child: _ThemeButton(onPressed: widget.onToggleTheme)),
                   ),
-                  SliverPadding(
-                    padding: EdgeInsets.fromLTRB(gutter, 32, gutter, 8),
-                    sliver: SliverToBoxAdapter(
-                      child: _Toolbar(
-                        controller: _searchController,
-                        onQueryChanged: () => setState(() {}),
-                        category: _category,
-                        onCategory: (category) => setState(() => _category = category),
-                        volume: _volume,
-                        onVolume: (value) => setState(() => _volume = value),
-                        enabled: _enabled,
-                        onToggleSound: _toggleSound,
+                  Positioned(
+                    right: 16,
+                    bottom: 16,
+                    child: SafeArea(child: _ScrollToTop(controller: _scroll)),
+                  ),
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1240),
+                      child: CustomScrollView(
+                        controller: _scroll,
+                        slivers: [
+                          SliverPadding(
+                            padding: EdgeInsets.fromLTRB(gutter, 72, gutter, 0),
+                            sliver: SliverToBoxAdapter(child: _Header(installCommand: _installCommand)),
+                          ),
+                          SliverPadding(
+                            padding: EdgeInsets.fromLTRB(gutter, 32, gutter, 8),
+                            sliver: SliverToBoxAdapter(
+                              child: _Toolbar(
+                                controller: _searchController,
+                                focusNode: _searchFocus,
+                                onQueryChanged: () => setState(() {}),
+                                category: _category,
+                                onCategory: (category) => setState(() => _category = category),
+                                volume: _volume,
+                                onVolume: (value) => setState(() => _volume = value),
+                                enabled: _enabled,
+                                onToggleSound: _toggleSound,
+                              ),
+                            ),
+                          ),
+                          if (sections.isEmpty)
+                            SliverFillRemaining(
+                              hasScrollBody: false,
+                              child: Center(
+                                child: Text('No sounds match "${_searchController.text}"',
+                                    style: misText(18, color: context.mis.textMuted)),
+                              ),
+                            ),
+                          for (final section in sections) ...[
+                            SliverPadding(
+                              padding: EdgeInsets.fromLTRB(gutter, 32, gutter, 14),
+                              sliver: SliverToBoxAdapter(
+                                  child: _SectionTitle(category: section.category, count: section.sounds.length)),
+                            ),
+                            SliverPadding(
+                              padding: EdgeInsets.symmetric(horizontal: gutter),
+                              sliver: SliverGrid.builder(
+                                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                                  maxCrossAxisExtent: 290,
+                                  mainAxisExtent: 196,
+                                  crossAxisSpacing: 16,
+                                  mainAxisSpacing: 16,
+                                ),
+                                itemCount: section.sounds.length,
+                                itemBuilder: (context, index) => _Reveal(
+                                  key: ValueKey(section.sounds[index]),
+                                  delay: Duration(milliseconds: 60 * (index % 4)),
+                                  child: SoundCard(sound: section.sounds[index], volume: _volume),
+                                ),
+                              ),
+                            ),
+                          ],
+                          SliverToBoxAdapter(child: _Footer(gutter: gutter)),
+                        ],
                       ),
                     ),
                   ),
-                  if (sections.isEmpty)
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Center(
-                        child: Text('No sounds match "${_searchController.text}"',
-                            style: misText(18, color: context.mis.textMuted)),
-                      ),
-                    ),
-                  for (final section in sections) ...[
-                    SliverPadding(
-                      padding: EdgeInsets.fromLTRB(gutter, 32, gutter, 14),
-                      sliver: SliverToBoxAdapter(
-                          child: _SectionTitle(category: section.category, count: section.sounds.length)),
-                    ),
-                    SliverPadding(
-                      padding: EdgeInsets.symmetric(horizontal: gutter),
-                      sliver: SliverGrid.builder(
-                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 290,
-                          mainAxisExtent: 196,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                        ),
-                        itemCount: section.sounds.length,
-                        itemBuilder: (context, index) => SoundCard(sound: section.sounds[index], volume: _volume),
-                      ),
-                    ),
-                  ],
-                  SliverToBoxAdapter(child: _Footer(gutter: gutter)),
                 ],
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -328,6 +401,7 @@ class _PillLink extends StatelessWidget {
 class _Toolbar extends StatelessWidget {
   const _Toolbar({
     required this.controller,
+    required this.focusNode,
     required this.onQueryChanged,
     required this.category,
     required this.onCategory,
@@ -338,6 +412,7 @@ class _Toolbar extends StatelessWidget {
   });
 
   final TextEditingController controller;
+  final FocusNode focusNode;
   final VoidCallback onQueryChanged;
   final SoundCategory? category;
   final ValueChanged<SoundCategory?> onCategory;
@@ -350,6 +425,7 @@ class _Toolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     final search = TextField(
       controller: controller,
+      focusNode: focusNode,
       onChanged: (_) => onQueryChanged(),
       style: misText(16),
       cursorColor: MisColors.green,
@@ -427,6 +503,7 @@ class _Toolbar extends StatelessWidget {
               ),
           ],
         ),
+        const _ShortcutHints(),
       ],
     );
   }
@@ -537,4 +614,104 @@ class _Footer extends StatelessWidget {
           ],
         ),
       );
+}
+
+/// Fades and slides a card in the first time it appears, so sections reveal themselves as the page scrolls.
+class _Reveal extends StatelessWidget {
+  const _Reveal({super.key, required this.delay, required this.child});
+
+  final Duration delay;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.disableAnimationsOf(context)) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 520) + delay,
+      curve: Interval(delay.inMilliseconds / (520 + delay.inMilliseconds), 1, curve: Curves.easeOutCubic),
+      builder: (context, value, child) => Opacity(
+        opacity: value,
+        child: Transform.translate(offset: Offset(0, 24 * (1 - value)), child: child),
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Appears after scrolling down, and takes the user back to the top.
+class _ScrollToTop extends StatelessWidget {
+  const _ScrollToTop({required this.controller});
+
+  final ScrollController controller;
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+        listenable: controller,
+        builder: (context, _) {
+          final visible = controller.hasClients && controller.offset > 600;
+          return AnimatedSlide(
+            offset: visible ? Offset.zero : const Offset(0, 1.5),
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutCubic,
+            child: AnimatedOpacity(
+              opacity: visible ? 1 : 0,
+              duration: const Duration(milliseconds: 250),
+              child: IgnorePointer(
+                ignoring: !visible,
+                child: Material(
+                  color: context.mis.surface,
+                  shape: CircleBorder(side: BorderSide(color: context.mis.accent.withValues(alpha: .3))),
+                  child: IconButton(
+                    tooltip: 'Back to top',
+                    onPressed: () => controller.animateTo(0,
+                        duration: const Duration(milliseconds: 600), curve: Curves.easeInOutCubic),
+                    icon: Icon(Icons.keyboard_arrow_up_rounded, color: context.mis.accent),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+}
+
+/// A line of keyboard shortcuts, shown on wide screens where there is usually a keyboard.
+class _ShortcutHints extends StatelessWidget {
+  const _ShortcutHints();
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.sizeOf(context).width < 900) return const SizedBox.shrink();
+    Widget key(String label) => Container(
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: context.mis.accent.withValues(alpha: .4)),
+          ),
+          child: Text(label, style: misText(12, weight: FontWeight.w700, color: context.mis.accent)),
+        );
+    Widget hint(String label, String text) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            key(label),
+            const SizedBox(width: 6),
+            Text(text, style: misText(13, color: context.mis.textFaint))
+          ],
+        );
+    return Padding(
+      padding: const EdgeInsets.only(top: 18),
+      child: Wrap(
+        spacing: 20,
+        runSpacing: 8,
+        children: [
+          hint('/', 'search'),
+          hint('1-5', 'categories'),
+          hint('0', 'all'),
+          hint('M', 'mute'),
+          hint('T', 'theme'),
+        ],
+      ),
+    );
+  }
 }
