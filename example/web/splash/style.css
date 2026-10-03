@@ -32,6 +32,12 @@ body, html {
   object-fit: cover;
 }
 
+@media (prefers-color-scheme: light) {
+  body, html {
+    background: #FFFFFF;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   body {
     margin:0;

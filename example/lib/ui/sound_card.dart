@@ -90,7 +90,8 @@ class _SoundCardState extends State<SoundCard> {
           backgroundColor: MisColors.lightBlue800,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
           duration: const Duration(seconds: 2),
-          content: Text('Copied $code', textAlign: TextAlign.center, style: misText(14, weight: FontWeight.w600)),
+          content: Text('Copied $code',
+              textAlign: TextAlign.center, style: misText(14, weight: FontWeight.w600, color: Colors.white)),
         ),
       );
   }
@@ -122,13 +123,13 @@ class _SoundCardState extends State<SoundCard> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
               gradient: active ? _gradient : null,
-              color: active ? null : MisColors.lightBlue300.withValues(alpha: .18),
+              color: active ? null : context.mis.accent.withValues(alpha: .18),
               boxShadow: _playing
                   ? [BoxShadow(color: MisColors.lightBlue.withValues(alpha: .45), blurRadius: 30, spreadRadius: 1)]
-                  : const [],
+                  : [BoxShadow(color: context.mis.cardShadow, blurRadius: 18, offset: const Offset(0, 6))],
             ),
             child: Material(
-              color: Color.alphaBlend(MisColors.lightBlue800.withValues(alpha: .75), MisColors.darkBackground),
+              color: Color.alphaBlend(context.mis.surface.withValues(alpha: .75), context.mis.background),
               borderRadius: BorderRadius.circular(23),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
@@ -144,7 +145,7 @@ class _SoundCardState extends State<SoundCard> {
                           const Spacer(),
                           Icon(
                             _playing ? Icons.graphic_eq_rounded : Icons.play_arrow_rounded,
-                            color: active ? Colors.white : MisColors.blue300,
+                            color: active ? context.mis.text : context.mis.textFaint,
                           ),
                         ],
                       ),
@@ -156,7 +157,7 @@ class _SoundCardState extends State<SoundCard> {
                           sound.description,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: misText(13, color: MisColors.grey, height: 1.3),
+                          style: misText(13, color: context.mis.textMuted, height: 1.3),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -177,12 +178,12 @@ class _SoundCardState extends State<SoundCard> {
                                     style: misText(
                                       12.5,
                                       weight: FontWeight.w600,
-                                      color: MisColors.lightBlue300,
+                                      color: context.mis.accent,
                                     ).copyWith(fontFamily: 'monospace', fontFamilyFallback: const ['Menlo', 'Courier']),
                                   ),
                                 ),
                                 const SizedBox(width: 6),
-                                const Icon(Icons.copy_rounded, size: 14, color: MisColors.blue300),
+                                Icon(Icons.copy_rounded, size: 14, color: context.mis.textFaint),
                               ],
                             ),
                           ),
@@ -215,9 +216,9 @@ class _IconBadge extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: playing ? gradient : null,
-          color: playing ? null : MisColors.darkBackground.withValues(alpha: .6),
-          border: Border.all(color: MisColors.lightBlue300.withValues(alpha: playing ? 0 : .25)),
+          color: playing ? null : context.mis.background.withValues(alpha: .6),
+          border: Border.all(color: context.mis.accent.withValues(alpha: playing ? 0 : .25)),
         ),
-        child: Icon(icon, size: 22, color: playing ? MisColors.darkBackground : Colors.white),
+        child: Icon(icon, size: 22, color: playing ? MisColors.darkBackground : context.mis.text),
       );
 }

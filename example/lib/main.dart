@@ -4,26 +4,46 @@ import 'package:sound_library/sound_library.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'style.dart';
+import 'ui/backdrop.dart';
 import 'ui/sound_card.dart';
 
 void main() {
   runApp(const SoundLibraryApp());
 }
 
-class SoundLibraryApp extends StatelessWidget {
+class SoundLibraryApp extends StatefulWidget {
   const SoundLibraryApp({super.key});
+
+  @override
+  State<SoundLibraryApp> createState() => _SoundLibraryAppState();
+}
+
+class _SoundLibraryAppState extends State<SoundLibraryApp> {
+  /// Follows the system until the user picks a mode.
+  ThemeMode _mode = ThemeMode.system;
 
   @override
   Widget build(BuildContext context) => MaterialApp(
         title: 'Sound Library by MIS Develop',
         debugShowCheckedModeBanner: false,
-        theme: misTheme(),
-        home: const SoundLibraryPage(),
+        theme: misTheme(Brightness.light),
+        darkTheme: misTheme(Brightness.dark),
+        themeMode: _mode,
+        home: Builder(
+          builder: (context) => SoundLibraryPage(
+            onToggleTheme: () => setState(
+              () => _mode = Theme.of(context).brightness == Brightness.dark ? ThemeMode.light : ThemeMode.dark,
+            ),
+          ),
+        ),
       );
 }
 
 class SoundLibraryPage extends StatefulWidget {
-  const SoundLibraryPage({super.key});
+  const SoundLibraryPage({super.key, required this.onToggleTheme});
+
+  /// Switches between light and dark mode.
+  final VoidCallback onToggleTheme;
 
   @override
   State<SoundLibraryPage> createState() => _SoundLibraryPageState();
@@ -86,7 +106,7 @@ class _SoundLibraryPageState extends State<SoundLibraryPage> {
     return Scaffold(
       body: Stack(
         children: [
-          const Positioned.fill(child: _Glow()),
+          const Positioned.fill(child: Backdrop()),
           Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1240),
@@ -108,6 +128,7 @@ class _SoundLibraryPageState extends State<SoundLibraryPage> {
                         onVolume: (value) => setState(() => _volume = value),
                         enabled: _enabled,
                         onToggleSound: _toggleSound,
+                        onToggleTheme: widget.onToggleTheme,
                       ),
                     ),
                   ),
@@ -116,7 +137,7 @@ class _SoundLibraryPageState extends State<SoundLibraryPage> {
                       hasScrollBody: false,
                       child: Center(
                         child: Text('No sounds match "${_searchController.text}"',
-                            style: misText(18, color: MisColors.grey)),
+                            style: misText(18, color: context.mis.textMuted)),
                       ),
                     ),
                   for (final section in sections) ...[
@@ -150,35 +171,6 @@ class _SoundLibraryPageState extends State<SoundLibraryPage> {
   }
 }
 
-/// Soft color glows behind the page, in the style of the MIS gradients.
-class _Glow extends StatelessWidget {
-  const _Glow();
-
-  @override
-  Widget build(BuildContext context) => IgnorePointer(
-        child: Stack(
-          children: [
-            _blob(alignment: const Alignment(-1.1, -1.1), color: MisColors.blue, size: 620, alpha: .55),
-            _blob(alignment: const Alignment(1.2, -.4), color: MisColors.magenta, size: 460, alpha: .16),
-            _blob(alignment: const Alignment(-.6, 1.3), color: MisColors.green, size: 520, alpha: .12),
-          ],
-        ),
-      );
-
-  Widget _blob({required Alignment alignment, required Color color, required double size, required double alpha}) =>
-      Align(
-        alignment: alignment,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: RadialGradient(colors: [color.withValues(alpha: alpha), color.withValues(alpha: 0)]),
-          ),
-        ),
-      );
-}
-
 class _Header extends StatelessWidget {
   const _Header({required this.installCommand});
 
@@ -195,7 +187,7 @@ class _Header extends StatelessWidget {
         Text(
           'Free UI sounds for your Flutter apps. ${Sounds.values.length} sounds in ${SoundCategory.values.length} categories, '
           'bundled as assets: no backend, no network.',
-          style: misText(compact ? 16 : 19, color: MisColors.lightBlue50, height: 1.4),
+          style: misText(compact ? 16 : 19, color: context.mis.textSubtitle, height: 1.4),
         ),
         const SizedBox(height: 22),
         Wrap(
@@ -246,23 +238,27 @@ class _CommandChip extends StatelessWidget {
                 backgroundColor: MisColors.lightBlue800,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
                 content: Text('Copied to clipboard',
-                    textAlign: TextAlign.center, style: misText(14, weight: FontWeight.w600)),
+                    textAlign: TextAlign.center, style: misText(14, weight: FontWeight.w600, color: Colors.white)),
               ),
             );
         },
         child: Ink(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
           decoration: BoxDecoration(
-            color: MisColors.lightBlue800,
+            color: context.mis.surface,
             borderRadius: BorderRadius.circular(60),
-            border: Border.all(color: MisColors.lightBlue300.withValues(alpha: .35)),
+            border: Border.all(color: context.mis.accent.withValues(alpha: .35)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 r'$ ',
-                style: misText(14, weight: FontWeight.w700, color: MisColors.green).copyWith(fontFamily: 'monospace'),
+                style: misText(14,
+                        weight: FontWeight.w700,
+                        color:
+                            Theme.of(context).brightness == Brightness.dark ? MisColors.green : const Color(0xFF1B8F3A))
+                    .copyWith(fontFamily: 'monospace'),
               ),
               Flexible(
                 child: Text(
@@ -272,7 +268,7 @@ class _CommandChip extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              const Icon(Icons.copy_rounded, size: 16, color: MisColors.lightBlue300),
+              Icon(Icons.copy_rounded, size: 16, color: context.mis.accent),
             ],
           ),
         ),
@@ -295,9 +291,9 @@ class _PillLink extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 18, color: MisColors.lightBlue300),
+              Icon(icon, size: 18, color: context.mis.accent),
               const SizedBox(width: 8),
-              Text(label, style: misText(15, weight: FontWeight.w600, color: MisColors.lightBlue300)),
+              Text(label, style: misText(15, weight: FontWeight.w600, color: context.mis.accent)),
             ],
           ),
         ),
@@ -314,6 +310,7 @@ class _Toolbar extends StatelessWidget {
     required this.onVolume,
     required this.enabled,
     required this.onToggleSound,
+    required this.onToggleTheme,
   });
 
   final TextEditingController controller;
@@ -324,6 +321,7 @@ class _Toolbar extends StatelessWidget {
   final ValueChanged<double> onVolume;
   final bool enabled;
   final VoidCallback onToggleSound;
+  final VoidCallback onToggleTheme;
 
   @override
   Widget build(BuildContext context) {
@@ -334,22 +332,22 @@ class _Toolbar extends StatelessWidget {
       cursorColor: MisColors.green,
       decoration: InputDecoration(
         hintText: 'Search sounds',
-        hintStyle: misText(16, color: MisColors.blue300),
-        prefixIcon: const Icon(Icons.search_rounded, color: MisColors.lightBlue300),
+        hintStyle: misText(16, color: context.mis.textFaint),
+        prefixIcon: Icon(Icons.search_rounded, color: context.mis.accent),
         suffixIcon: controller.text.isEmpty
             ? null
             : IconButton(
                 tooltip: 'Clear',
-                icon: const Icon(Icons.close_rounded, color: MisColors.lightBlue300),
+                icon: Icon(Icons.close_rounded, color: context.mis.accent),
                 onPressed: () {
                   controller.clear();
                   onQueryChanged();
                 },
               ),
         filled: true,
-        fillColor: MisColors.lightBlue800.withValues(alpha: .8),
+        fillColor: context.mis.surface.withValues(alpha: .8),
         contentPadding: const EdgeInsets.symmetric(vertical: 14),
-        enabledBorder: _border(MisColors.lightBlue300.withValues(alpha: .3)),
+        enabledBorder: _border(context.mis.accent.withValues(alpha: .3)),
         focusedBorder: _border(MisColors.lightBlue),
       ),
     );
@@ -367,11 +365,19 @@ class _Toolbar extends StatelessWidget {
           child: SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: MisColors.lightBlue,
-              inactiveTrackColor: MisColors.lightBlue800,
+              inactiveTrackColor: context.mis.surface,
               thumbColor: MisColors.green,
               overlayColor: MisColors.green.withValues(alpha: .15),
             ),
             child: Slider(value: volume, onChanged: enabled ? onVolume : null),
+          ),
+        ),
+        IconButton(
+          tooltip: Theme.of(context).brightness == Brightness.dark ? 'Light mode' : 'Dark mode',
+          onPressed: onToggleTheme,
+          icon: Icon(
+            Theme.of(context).brightness == Brightness.dark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+            color: context.mis.accent,
           ),
         ),
       ],
@@ -431,7 +437,7 @@ class _CategoryPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final foreground = selected ? MisColors.darkBackground : Colors.white;
+    final foreground = selected ? MisColors.darkBackground : context.mis.text;
     return Semantics(
       button: true,
       selected: selected,
@@ -444,8 +450,8 @@ class _CategoryPill extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(40),
             gradient: selected ? gradient : null,
-            color: selected ? null : MisColors.lightBlue800.withValues(alpha: .8),
-            border: Border.all(color: selected ? Colors.transparent : MisColors.lightBlue300.withValues(alpha: .25)),
+            color: selected ? null : context.mis.surface.withValues(alpha: .8),
+            border: Border.all(color: selected ? Colors.transparent : context.mis.accent.withValues(alpha: .25)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -483,7 +489,7 @@ class _SectionTitle extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('${category.label} · $count', style: misText(24, weight: FontWeight.w700)),
-                Text(category.description, style: misText(14, color: MisColors.grey)),
+                Text(category.description, style: misText(14, color: context.mis.textMuted)),
               ],
             ),
           ),
@@ -501,7 +507,7 @@ class _Footer extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(gutter, 56, gutter, 40),
         child: Column(
           children: [
-            Divider(color: MisColors.lightBlue300.withValues(alpha: .2)),
+            Divider(color: context.mis.accent.withValues(alpha: .2)),
             const SizedBox(height: 20),
             InkWell(
               borderRadius: BorderRadius.circular(8),
@@ -512,7 +518,7 @@ class _Footer extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            Text('Free to use in personal and commercial projects.', style: misText(13, color: MisColors.blue300)),
+            Text('Free to use in personal and commercial projects.', style: misText(13, color: context.mis.textFaint)),
           ],
         ),
       );

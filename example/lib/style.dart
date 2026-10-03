@@ -52,20 +52,100 @@ class MisGradients {
 }
 
 /// The design system uses Karla, light, with a letter spacing of 0.5.
-TextStyle misText(double size, {FontWeight weight = FontWeight.w300, Color color = Colors.white, double? height}) =>
+/// With no [color] the text inherits it from the theme, so it follows light and dark mode.
+TextStyle misText(double size, {FontWeight weight = FontWeight.w300, Color? color, double? height}) =>
     GoogleFonts.karla(fontSize: size, fontWeight: weight, color: color, letterSpacing: .5, height: height);
 
-ThemeData misTheme() {
+/// Colors that change between light and dark mode. Read them with `context.mis`.
+@immutable
+class MisPalette extends ThemeExtension<MisPalette> {
+  const MisPalette({
+    required this.background,
+    required this.surface,
+    required this.text,
+    required this.textSubtitle,
+    required this.textMuted,
+    required this.textFaint,
+    required this.accent,
+    required this.glow,
+    required this.cardShadow,
+  });
+
+  /// Page background.
+  final Color background;
+
+  /// Cards, chips and fields.
+  final Color surface;
+
+  /// Primary text and icons.
+  final Color text;
+
+  /// Text right below a title.
+  final Color textSubtitle;
+
+  /// Descriptions.
+  final Color textMuted;
+
+  /// Hints and fine print.
+  final Color textFaint;
+
+  /// Links, code and outlines.
+  final Color accent;
+
+  /// How strong the background glows are, from 0 to 1.
+  final double glow;
+
+  /// Shadow under resting cards.
+  final Color cardShadow;
+
+  static const dark = MisPalette(
+    background: MisColors.darkBackground,
+    surface: MisColors.lightBlue800,
+    text: Colors.white,
+    textSubtitle: MisColors.lightBlue50,
+    textMuted: MisColors.grey,
+    textFaint: MisColors.blue300,
+    accent: MisColors.lightBlue300,
+    glow: 1,
+    cardShadow: Colors.transparent,
+  );
+
+  static const light = MisPalette(
+    background: Colors.white,
+    surface: Color(0xFFEEF2FF),
+    text: MisColors.darkBackground,
+    textSubtitle: MisColors.lightBlue800,
+    textMuted: Color(0xFF4F5486),
+    textFaint: Color(0xFF6F73A8),
+    accent: MisColors.blue,
+    glow: .3,
+    cardShadow: Color(0x1A272CA3),
+  );
+
+  @override
+  MisPalette copyWith() => this;
+
+  @override
+  MisPalette lerp(MisPalette? other, double t) => t < .5 ? this : other ?? this;
+}
+
+extension MisContext on BuildContext {
+  MisPalette get mis => Theme.of(this).extension<MisPalette>()!;
+}
+
+ThemeData misTheme(Brightness brightness) {
+  final palette = brightness == Brightness.dark ? MisPalette.dark : MisPalette.light;
   final scheme = ColorScheme.fromSeed(
     seedColor: MisColors.blue,
-    brightness: Brightness.dark,
-    surface: MisColors.darkBackground,
-  );
+    brightness: brightness,
+    surface: palette.background,
+  ).copyWith(onSurface: palette.text);
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
-    scaffoldBackgroundColor: MisColors.darkBackground,
+    scaffoldBackgroundColor: palette.background,
     splashFactory: InkSparkle.splashFactory,
+    extensions: [palette],
   );
 }
 
