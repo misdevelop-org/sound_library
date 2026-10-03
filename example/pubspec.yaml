@@ -1,24 +1,26 @@
 name: sound_library_example
-description: Easy UI sounds to directly use in your app through MIS Develop sound library database
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-
-version: 1.0.0+1
+description: Browse, hear and copy every sound of the MIS Develop sound library. Live at sounds.library.misdevelop.com.
+publish_to: none
+version: 2.0.0+1
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ">=3.6.0 <4.0.0"
+  flutter: ">=3.27.0"
+
 dependencies:
   flutter:
     sdk: flutter
-  flutter_web_plugins:
-    sdk: flutter
   sound_library:
     path: ../
+  google_fonts: ^9.0.0
+  url_launcher: ^6.3.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-  flutter_lints: ^1.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/

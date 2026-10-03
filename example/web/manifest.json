@@ -3,10 +3,10 @@
     "short_name": "Sound Library",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#313131",
-    "theme_color": "#0175C2",
-    "description": "Sound Library facilitated by MIS Develop",
-    "orientation": "portrait-primary",
+    "background_color": "#07081C",
+    "theme_color": "#07081C",
+    "description": "Free, categorized UI sounds for Flutter apps.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {
