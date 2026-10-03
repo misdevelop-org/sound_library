@@ -161,7 +161,9 @@ Intros and welcomes that give your app its personality.
 ## Platform notes
 
 - **Web**: browsers only start audio after the user interacts with the page, so a sound triggered on load will be
-  skipped. Sounds triggered by a tap or click work.
+  skipped. Sounds triggered by a tap or click work. Bundled sounds play through the Web Audio API, which is what makes
+  the shortest ones audible on iPhone. Call `SoundPlayer.init()` when your app starts so the first touch unlocks audio.
+  Like other Web Audio sounds on iOS, they follow the silent switch of the device.
 - **iOS and Android**: sounds mix with other audio and do not take audio focus.
 
 ## Roadmap

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'sounds.dart';
+import 'web_sfx_stub.dart' if (dart.library.js_interop) 'web_sfx_web.dart';
 
 /// Plays the sounds of the library, or any other audio source.
 ///
@@ -40,8 +41,12 @@ class SoundPlayer {
   ///
   /// Sets the [volume] from `0.0` to `1.0`, defaults to `1.0`.
   /// Starts at [position] on the track when it is given.
-  static Future<void> play(Sounds sound, {double volume = 1, Duration? position}) =>
-      _play(AssetSource(sound.assetPath), volume, position, cache: _bundledCache);
+  static Future<void> play(Sounds sound, {double volume = 1, Duration? position}) async {
+    if (!isAudioEnabled) return;
+    // On the web, bundled sounds go through Web Audio: no start-up delay, so even the shortest clicks are heard on iOS.
+    if (WebSfx.isSupported && await WebSfx.play(sound.assetPath, volume: volume, position: position)) return;
+    await _play(AssetSource(sound.assetPath), volume, position, cache: _bundledCache);
+  }
 
   /// Plays the audio file at the given network [url].
   static Future<void> playFromUrl(String url, {double volume = 1, Duration? position}) =>
@@ -61,9 +66,19 @@ class SoundPlayer {
   static Future<void> playFromDeviceFilePath(String file, {double volume = 1, Duration? position}) =>
       _play(DeviceFileSource(file), volume, position);
 
+  /// Gets audio ready. Optional: the first play does it too.
+  ///
+  /// On the web, browsers lock audio until the user touches the page. Call this when your app starts so the first touch
+  /// unlocks it, instead of the first sound.
+  static void init() => WebSfx.init();
+
   /// Loads the given [sounds] into memory so their first play has no delay.
   static Future<void> preload(Iterable<Sounds> sounds) async {
     try {
+      if (WebSfx.isSupported) {
+        await WebSfx.preload(sounds.map((sound) => sound.assetPath));
+        return;
+      }
       await _bundledCache.loadAll(sounds.map((sound) => sound.assetPath).toList());
     } on Object catch (error) {
       debugPrint('sound_library: could not preload sounds: $error');
@@ -71,7 +86,10 @@ class SoundPlayer {
   }
 
   /// Stops everything that is playing.
-  static Future<void> stop() => Future.wait(instance._players.map((player) => player.stop()));
+  static Future<void> stop() {
+    WebSfx.stop();
+    return Future.wait(instance._players.map((player) => player.stop()));
+  }
 
   /// Releases the audio players. They are created again on the next play.
   static Future<void> dispose() async {

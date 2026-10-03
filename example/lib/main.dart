@@ -44,7 +44,6 @@ class SoundLibraryPage extends StatefulWidget {
 
   /// Switches between light and dark mode.
   final VoidCallback onToggleTheme;
-
   @override
   State<SoundLibraryPage> createState() => _SoundLibraryPageState();
 }
@@ -64,6 +63,7 @@ class _SoundLibraryPageState extends State<SoundLibraryPage> {
       if (mounted) setState(() => _enabled = enabled);
     });
     // Decode every sound once so the first tap on a card has no delay.
+    SoundPlayer.init();
     SoundPlayer.preload(Sounds.values);
   }
 
@@ -107,13 +107,18 @@ class _SoundLibraryPageState extends State<SoundLibraryPage> {
       body: Stack(
         children: [
           const Positioned.fill(child: Backdrop()),
+          Positioned(
+            top: 12,
+            right: 12,
+            child: SafeArea(child: _ThemeButton(onPressed: widget.onToggleTheme)),
+          ),
           Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1240),
               child: CustomScrollView(
                 slivers: [
                   SliverPadding(
-                    padding: EdgeInsets.fromLTRB(gutter, 32, gutter, 0),
+                    padding: EdgeInsets.fromLTRB(gutter, 72, gutter, 0),
                     sliver: SliverToBoxAdapter(child: _Header(installCommand: _installCommand)),
                   ),
                   SliverPadding(
@@ -128,7 +133,6 @@ class _SoundLibraryPageState extends State<SoundLibraryPage> {
                         onVolume: (value) => setState(() => _volume = value),
                         enabled: _enabled,
                         onToggleSound: _toggleSound,
-                        onToggleTheme: widget.onToggleTheme,
                       ),
                     ),
                   ),
@@ -166,6 +170,27 @@ class _SoundLibraryPageState extends State<SoundLibraryPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Switches between light and dark mode. Sits in the top right corner of the page.
+class _ThemeButton extends StatelessWidget {
+  const _ThemeButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return Material(
+      color: context.mis.surface.withValues(alpha: .8),
+      shape: CircleBorder(side: BorderSide(color: context.mis.accent.withValues(alpha: .3))),
+      child: IconButton(
+        tooltip: dark ? 'Light mode' : 'Dark mode',
+        onPressed: onPressed,
+        icon: Icon(dark ? Icons.light_mode_rounded : Icons.dark_mode_rounded, color: context.mis.accent),
       ),
     );
   }
@@ -310,7 +335,6 @@ class _Toolbar extends StatelessWidget {
     required this.onVolume,
     required this.enabled,
     required this.onToggleSound,
-    required this.onToggleTheme,
   });
 
   final TextEditingController controller;
@@ -321,7 +345,6 @@ class _Toolbar extends StatelessWidget {
   final ValueChanged<double> onVolume;
   final bool enabled;
   final VoidCallback onToggleSound;
-  final VoidCallback onToggleTheme;
 
   @override
   Widget build(BuildContext context) {
@@ -370,14 +393,6 @@ class _Toolbar extends StatelessWidget {
               overlayColor: MisColors.green.withValues(alpha: .15),
             ),
             child: Slider(value: volume, onChanged: enabled ? onVolume : null),
-          ),
-        ),
-        IconButton(
-          tooltip: Theme.of(context).brightness == Brightness.dark ? 'Light mode' : 'Dark mode',
-          onPressed: onToggleTheme,
-          icon: Icon(
-            Theme.of(context).brightness == Brightness.dark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-            color: context.mis.accent,
           ),
         ),
       ],

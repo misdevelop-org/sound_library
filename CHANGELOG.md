@@ -1,3 +1,13 @@
+## 2.0.1
+
+- Fixed very short sounds, like `Sounds.click` and `Sounds.tap`, not being heard on iPhone and iPad browsers. On the web,
+  bundled sounds now play through the Web Audio API: no start-up delay, they overlap freely, and audio is unlocked on
+  the first touch, click or key press.
+- Added `SoundPlayer.init()`, to call at app start so the first touch unlocks audio on the web. It is optional.
+- Added the `web` package as a dependency.
+- Example app: moved the light/dark switch to the top right corner, and the live site no longer needs a cache clear to
+  show a new version (no service worker, and revalidated caching on Firebase Hosting).
+
 ## 2.0.0
 
 Breaking: the sounds are now bundled with the package instead of being downloaded from Firebase Storage.

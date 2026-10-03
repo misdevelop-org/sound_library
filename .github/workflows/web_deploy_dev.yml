@@ -51,7 +51,7 @@ jobs:
           flutter pub get
           flutter analyze
           flutter test
-          flutter build web --release
+          flutter build web --release --pwa-strategy=none
   
       - name: Catch flutter build error
         if: ${{ failure()}}
@@ -99,6 +99,14 @@ jobs:
                 "firebase.json",
                 "**/.*",
                 "**/node_modules/**"
+              ],
+              "headers": [
+                {
+                  "source": "**",
+                  "headers": [
+                    { "key": "Cache-Control", "value": "no-cache" }
+                  ]
+                }
               ],
               "rewrites": [
                 {
