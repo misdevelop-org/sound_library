@@ -18,6 +18,7 @@ class _NativeBackend implements SoundBackend {
   final List<AudioPlayer> _players = [];
   int _next = 0;
   bool _contextConfigured = false;
+  bool _respectSilence = false;
 
   @override
   void init() {}
@@ -74,16 +75,44 @@ class _NativeBackend implements SoundBackend {
     return player;
   }
 
+  @override
+  Future<void> setRespectSilence(bool value) async {
+    if (_respectSilence == value) return;
+    _respectSilence = value;
+    // Before the first play the context is built with the new value anyway.
+    if (_contextConfigured) await _applyContext();
+  }
+
   /// UI sounds should not pause the music or the podcast the user is listening to.
   Future<void> _configureContext() async {
     if (_contextConfigured) return;
     _contextConfigured = true;
+    await _applyContext();
+  }
+
+  /// Sets the audio context globally and on the players that already exist (on Android a context is per player).
+  Future<void> _applyContext() async {
     try {
-      await AudioPlayer.global.setAudioContext(
-        AudioContextConfig(focus: AudioContextConfigFocus.mixWithOthers).build(),
-      );
+      final context = buildSoundContext(respectSilence: _respectSilence);
+      await AudioPlayer.global.setAudioContext(context);
+      for (final player in List<AudioPlayer>.of(_players)) {
+        await player.setAudioContext(context);
+      }
     } on Object catch (error) {
       debugPrint('sound_library: audio context not supported on this platform: $error');
     }
   }
+}
+
+/// The audio context used for UI sounds: they mix with other audio and never take audio focus.
+///
+/// With [respectSilence] they also follow the silent switch (iOS) or the ringer mode (Android).
+/// On iOS that means the `ambient` category, which silences and mixes on its own. `audioplayers` rejects asking for
+/// `respectSilence` and `mixWithOthers` together there.
+@visibleForTesting
+AudioContext buildSoundContext({required bool respectSilence}) {
+  final config = respectSilence && defaultTargetPlatform == TargetPlatform.iOS
+      ? AudioContextConfig(respectSilence: true)
+      : AudioContextConfig(focus: AudioContextConfigFocus.mixWithOthers, respectSilence: respectSilence);
+  return config.build();
 }

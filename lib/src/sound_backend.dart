@@ -25,6 +25,10 @@ abstract class SoundBackend {
   /// Plays the audio file at a [path] on the device.
   Future<void> playFile(String path, {required double volume, Duration? position});
 
+  /// Makes sounds follow the silent switch / ringer mode of the device when [value] is true. Only the platforms
+  /// that have such a switch (iOS, Android) do anything; the others ignore it.
+  Future<void> setRespectSilence(bool value);
+
   /// Stops everything that is playing.
   Future<void> stop();
 

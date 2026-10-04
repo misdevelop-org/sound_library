@@ -26,6 +26,7 @@ class SoundPlayer {
 
   final SoundBackend _backend = createBackend();
   bool _enabled = true;
+  bool _respectSilence = false;
   SharedPreferences? _prefs;
 
   /// Plays a bundled [sound].
@@ -75,6 +76,23 @@ class SoundPlayer {
 
   /// Releases the audio players. They are created again on the next play.
   static Future<void> dispose() => instance._backend.dispose();
+
+  /// Whether sounds follow the silent switch (iOS) or the ringer mode (Android) of the device. Defaults to `false`.
+  static bool get respectSilence => instance._respectSilence;
+
+  /// Makes sounds follow the silent switch (iOS) or the ringer mode (Android) when [value] is true, so a UI sound is
+  /// not heard on a silenced phone. Off by default. It is not saved: call it on startup, right after [init].
+  ///
+  /// Sounds keep mixing with other audio, like the music the user is playing. It has no effect on the web, where
+  /// sounds already follow the silent switch, nor on desktop.
+  static Future<void> setRespectSilence(bool value) async {
+    instance._respectSilence = value;
+    try {
+      await instance._backend.setRespectSilence(value);
+    } on Object catch (error) {
+      debugPrint('sound_library: could not change respectSilence: $error');
+    }
+  }
 
   /// Whether audio is currently enabled on this instance.
   static bool get isAudioEnabled => instance._enabled;

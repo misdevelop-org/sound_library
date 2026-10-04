@@ -91,6 +91,20 @@ await SoundPlayer.setAudioEnabled(false);
 final bool enabled = SoundPlayer.isAudioEnabled;
 ```
 
+### Follow the silent switch
+
+By default sounds play even when the iPhone is silenced, because they use the `playback` audio session so they mix
+with the user's music. Turn this on for UI sounds that should respect the silent switch (iOS) and the ringer mode
+(Android):
+
+```dart
+// On startup, after SoundPlayer.init(). Not saved: call it every time the app starts.
+await SoundPlayer.setRespectSilence(true);
+```
+
+Sounds still mix with other audio and never pause it. It has no effect on the web, where sounds already follow the
+silent switch, nor on desktop.
+
 ### Stop and release
 
 ```dart
@@ -164,7 +178,8 @@ Intros and welcomes that give your app its personality.
   skipped. Sounds triggered by a tap or click work. All sounds play through the Web Audio API, which is what makes
   the shortest ones audible on iPhone. Call `SoundPlayer.init()` when your app starts so the first touch unlocks audio.
   Like other Web Audio sounds on iOS, they follow the silent switch of the device.
-- **iOS and Android**: sounds mix with other audio and do not take audio focus.
+- **iOS and Android**: sounds mix with other audio and do not take audio focus. They ignore the silent switch and the
+  ringer mode unless you call `SoundPlayer.setRespectSilence(true)`.
 
 ## Roadmap
 

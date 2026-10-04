@@ -1,3 +1,15 @@
+## 2.1.0
+
+- Added `SoundPlayer.setRespectSilence(bool)` and `SoundPlayer.respectSilence`: an opt-in setting so sounds follow the
+  silent switch of the iPhone (and the ringer mode on Android), while still mixing with other audio. It is off by
+  default, so existing apps behave as before: on iOS sounds are played even when the phone is silenced, because the
+  audio session is `playback` + `mixWithOthers`. Call `await SoundPlayer.setRespectSilence(true)` on startup.
+- On iOS it uses the `ambient` category, which silences and mixes on its own: `audioplayers` rejects asking for
+  `respectSilence` and `mixWithOthers` together there. On Android it uses the ringtone usage type and takes no audio
+  focus. Players that already exist get the new context too. The web and desktop ignore it (on the web, sounds
+  already follow the silent switch).
+- Added tests for the audio context of each platform.
+
 ## 2.0.2
 
 - WebAssembly: the web build no longer includes `audioplayers`, which pub.dev flagged as not compatible with wasm because

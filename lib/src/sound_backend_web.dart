@@ -95,6 +95,10 @@ class _WebBackend implements SoundBackend {
   Future<void> playFile(String path, {required double volume, Duration? position}) =>
       playUrl(path, volume: volume, position: position);
 
+  /// Web Audio sounds already follow the silent switch on iOS, so there is nothing to configure.
+  @override
+  Future<void> setRespectSilence(bool value) async {}
+
   @override
   Future<void> stop() async {
     for (final source in _sources.toList()) {
