@@ -51,7 +51,7 @@ jobs:
           flutter pub get
           flutter analyze
           flutter test
-          flutter build web --release --pwa-strategy=none
+          flutter build web --release --wasm --pwa-strategy=none
   
       - name: Catch flutter build error
         if: ${{ failure()}}
