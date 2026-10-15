@@ -3,8 +3,8 @@
 
 Python standard library only, plus `ffmpeg` (with libmp3lame) to encode the longer sounds to mp3.
 
-    python3 tools/generate_sounds.py            # writes to assets/sounds/
-    python3 tools/generate_sounds.py click_ish  # only the sounds whose name contains the text
+    python3 tool/generate_sounds.py            # writes to assets/sounds/
+    python3 tool/generate_sounds.py click_ish  # only the sounds whose name contains the text
 
 The sounds are original: sums of sine waves with exponential decays, plus a little filtered noise. They share a
 pentatonic palette, so any two can play at the same time without clashing, and they are normalized to the level of the
