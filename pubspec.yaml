@@ -1,8 +1,8 @@
 name: sound_library
 description: >-
-  23 free, categorized UI sounds bundled as assets, with a tiny SoundPlayer to play them
+  39 free, categorized UI sounds bundled as assets, with a tiny SoundPlayer to play them
   (plus network, file and byte sources). No backend, no network needed.
-version: 2.1.0
+version: 2.2.0
 homepage: https://sounds.library.misdevelop.com
 repository: https://github.com/misdevelop-org/sound_library
 issue_tracker: https://github.com/misdevelop-org/sound_library/issues
@@ -33,5 +33,7 @@ flutter:
     - assets/sounds/interaction/
     - assets/sounds/navigation/
     - assets/sounds/feedback/
+    - assets/sounds/notification/
+    - assets/sounds/communication/
     - assets/sounds/commerce/
     - assets/sounds/brand/

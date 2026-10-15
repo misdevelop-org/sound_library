@@ -9,6 +9,12 @@ enum SoundCategory {
   /// Outcomes of an action: success, deletion and alerts.
   feedback('Feedback', 'The outcome of an action: success, deletion and alerts.', 'feedback'),
 
+  /// Alerts that reach the user even when they are not looking at the screen.
+  notification('Notification', 'Alerts, mentions, reminders and alarms.', 'notification'),
+
+  /// Messages, chats and typing.
+  communication('Communication', 'Sending, receiving and typing messages.', 'communication'),
+
   /// Shopping, orders and payments.
   commerce('Commerce', 'Carts, orders and payments.', 'commerce'),
 
@@ -54,6 +60,15 @@ enum Sounds {
   /// General action, usually without direct user interaction.
   action(SoundCategory.interaction, 'action.mp3', 'Action', 'General action, usually without user interaction.'),
 
+  /// A switch turns on.
+  toggleOn(SoundCategory.interaction, 'toggle_on.wav', 'Toggle on', 'A switch or checkbox turns on.'),
+
+  /// A switch turns off.
+  toggleOff(SoundCategory.interaction, 'toggle_off.wav', 'Toggle off', 'A switch or checkbox turns off.'),
+
+  /// A picker, tab or list item is selected.
+  select(SoundCategory.interaction, 'select.wav', 'Select', 'Pick an item in a list, a tab or a picker.'),
+
   // Navigation
   /// Open a drawer, menu or popup.
   open(SoundCategory.navigation, 'open.mp3', 'Open', 'Open a drawer, menu or popup.'),
@@ -87,7 +102,57 @@ enum Sounds {
   /// Long glass chime.
   glass(SoundCategory.feedback, 'glass.mp3', 'Glass', 'Long glass chime for notices worth noticing.'),
 
+  /// Something went wrong.
+  error(SoundCategory.feedback, 'error.mp3', 'Error', 'Something went wrong. Two falling, buzzy notes.'),
+
+  /// Heads up.
+  warning(SoundCategory.feedback, 'warning.mp3', 'Warning', 'Heads up: a double beep.'),
+
+  /// Neutral information.
+  info(SoundCategory.feedback, 'info.mp3', 'Info', 'A soft bell for neutral information.'),
+
+  // Notification
+  /// A new notification.
+  notification(SoundCategory.notification, 'notification.mp3', 'Notification', 'A new notification. Two rising bells.'),
+
+  /// Someone mentioned the user.
+  mention(SoundCategory.notification, 'mention.mp3', 'Mention', 'Someone mentioned you. A quick rising arpeggio.'),
+
+  /// A reminder is due.
+  reminder(SoundCategory.notification, 'reminder.mp3', 'Reminder', 'A reminder is due. Two bells with an echo.'),
+
+  /// An alarm.
+  alarm(SoundCategory.notification, 'alarm.mp3', 'Alarm', 'An alarm or timer going off. Alternating beeps.'),
+
+  // Communication
+  /// A message was sent.
+  messageSent(
+      SoundCategory.communication, 'message_sent.wav', 'Message sent', 'A message was sent. A quick upward swoosh.'),
+
+  /// A message arrived.
+  messageReceived(
+    SoundCategory.communication,
+    'message_received.mp3',
+    'Message received',
+    'A message arrived. Two soft rising notes.',
+  ),
+
+  /// A typewriter key strike.
+  typing(SoundCategory.communication, 'typing.wav', 'Typing',
+      'A typewriter key strike, for typing indicators and keyboards.'),
+
   // Commerce
+  /// A payment went through.
+  paymentSuccess(
+      SoundCategory.commerce, 'payment_success.mp3', 'Payment success', 'A payment went through. A rising arpeggio.'),
+
+  /// A payment was declined.
+  paymentFailed(
+      SoundCategory.commerce, 'payment_failed.mp3', 'Payment failed', 'A payment was declined. Two falling notes.'),
+
+  /// A coin.
+  coin(SoundCategory.commerce, 'coin.mp3', 'Coin', 'A coin drops: a bright two-note blip.'),
+
   /// Item added to the cart.
   addToCart(SoundCategory.commerce, 'add_to_cart.mp3', 'Add to cart', 'Item added to the cart.'),
 

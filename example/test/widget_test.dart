@@ -72,4 +72,22 @@ void main() {
     await tester.pump();
     expect(find.byIcon(Icons.volume_up_rounded), findsOneWidget);
   });
+
+  testWidgets('lists the notification and communication categories', (tester) async {
+    tester.view.physicalSize = const Size(1400, 4000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(const SoundLibraryApp());
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.digit4);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('Alarm'), findsOneWidget);
+    expect(find.text('Click'), findsNothing);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.digit5);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('Message sent'), findsOneWidget);
+  });
 }

@@ -128,7 +128,8 @@ class _SoundLibraryPageState extends State<SoundLibraryPage> {
     } else if (key == LogicalKeyboardKey.escape && _searchController.text.isNotEmpty) {
       _searchController.clear();
       setState(() {});
-    } else if (key.keyId >= LogicalKeyboardKey.digit0.keyId && key.keyId <= LogicalKeyboardKey.digit5.keyId) {
+    } else if (key.keyId >= LogicalKeyboardKey.digit0.keyId &&
+        key.keyId <= LogicalKeyboardKey.digit0.keyId + SoundCategory.values.length) {
       final index = key.keyId - LogicalKeyboardKey.digit0.keyId;
       setState(() => _category = index == 0 ? null : SoundCategory.values[index - 1]);
     } else {
@@ -706,7 +707,7 @@ class _ShortcutHints extends StatelessWidget {
         runSpacing: 8,
         children: [
           hint('/', 'search'),
-          hint('1-5', 'categories'),
+          hint('1-${SoundCategory.values.length}', 'categories'),
           hint('0', 'all'),
           hint('M', 'mute'),
           hint('T', 'theme'),
